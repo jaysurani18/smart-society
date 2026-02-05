@@ -1,14 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const { fileComplaint, getComplaints, resolveComplaint } = require('../controllers/complaintController');
+const { 
+  fileComplaint, 
+  getComplaints, 
+  updateComplaintStatus // <--- Must match the name in your controller exactly
+} = require('../controllers/complaintController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
-// Existing Routes
+// 1. File a complaint
 router.post('/', protect, upload.single('image'), fileComplaint);
+
+// 2. Get complaints list
 router.get('/', protect, getComplaints);
 
-// NEW ROUTE: Status Update
-router.put('/:id/status', protect, resolveComplaint);
+// 3. Update status (This is where the crash was happening)
+router.put('/:id/status', protect, updateComplaintStatus); 
 
 module.exports = router;

@@ -4,18 +4,23 @@ const {
   loginUser, 
   registerUser, 
   inviteUser, 
-  setupPassword, // <--- Import this
+  setupPassword, 
   getAllUsers, 
   deleteUser, 
-  updateUserRole 
+  updateUserRole,
+  updateProfile // <--- THIS WAS MISSING
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
+// Public Routes
 router.post('/login', loginUser);
 router.post('/register', registerUser);
-router.post('/setup-password', setupPassword); // <--- NO PROTECT MIDDLEWARE HERE
+router.post('/setup-password', setupPassword); 
 
-// Protected Admin Routes
+// Protected Routes (Logged in users)
+router.put('/profile', protect, updateProfile); // <--- Now this will work
+
+// Admin Routes
 router.post('/invite', protect, inviteUser);
 router.get('/', protect, getAllUsers);
 router.delete('/:id', protect, deleteUser);

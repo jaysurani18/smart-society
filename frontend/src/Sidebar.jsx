@@ -114,6 +114,7 @@ const Sidebar = ({ user, activeTab, setActiveTab, onLogout }) => {
             <p className="text-xs text-slate-500 truncate capitalize">{user.role}</p>
           </div>
         </div>
+        
         <button
           onClick={onLogout}
           className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white py-2 rounded-lg transition-all duration-300 text-sm font-medium"

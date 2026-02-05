@@ -124,6 +124,37 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
+// @desc    Update User Profile (Self)
+exports.updateProfile = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Allow updating these fields
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.wing = req.body.wing || user.wing;
+    user.flatNumber = req.body.flatNumber || user.flatNumber;
+
+    // Optional: Add phone if you added it to the model
+    // user.phone = req.body.phone || user.phone;
+
+    await user.save();
+
+    res.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      wing: user.wing,
+      flatNumber: user.flatNumber
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating profile' });
+  }
+};
+
 // @desc    Update Role
 exports.updateUserRole = async (req, res) => {
   try {

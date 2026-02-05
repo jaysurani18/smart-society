@@ -1,5 +1,6 @@
-const { Complaint } = require('../models');
+const { Complaint, User } = require('../models');
 
+// File a new complaint
 exports.fileComplaint = async (req, res) => {
   try {
     const { title, description } = req.body;
@@ -9,7 +10,8 @@ exports.fileComplaint = async (req, res) => {
       title,
       description,
       imageUrl,
-      userId: req.user.id
+      userId: req.user.id,
+      status: 'pending' // Explicit default
     });
 
     res.status(201).json({ message: 'Complaint filed successfully', complaint });
@@ -18,26 +20,33 @@ exports.fileComplaint = async (req, res) => {
   }
 };
 
+// Get complaints (Admin sees all, Resident sees theirs)
 exports.getComplaints = async (req, res) => {
   try {
     const filter = req.user.role === 'admin' ? {} : { userId: req.user.id };
-    const complaints = await Complaint.findAll({ where: filter, order: [['createdAt', 'DESC']] });
+    
+    // We include the User model so Admins can see WHO filed the complaint
+    const complaints = await Complaint.findAll({ 
+      where: filter, 
+      include: [{ model: User, attributes: ['name', 'wing', 'flatNumber'] }],
+      order: [['createdAt', 'DESC']] 
+    });
+    
     res.json(complaints);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching complaints' });
   }
 };
 
-// NEW FUNCTION: Update Status
-exports.resolveComplaint = async (req, res) => {
+// Update Status (Admin Only)
+exports.updateComplaintStatus = async (req, res) => {
   try {
-    // 1. Security Check: Only Admins allowed
     if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Not authorized' });
+      return res.status(403).json({ message: 'Only admins can update status' });
     }
 
     const { id } = req.params;
-    const { status } = req.body; // 'resolved' or 'pending'
+    const { status } = req.body; // Expecting: 'pending', 'in-progress', or 'resolved'
 
     const complaint = await Complaint.findByPk(id);
     if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
@@ -45,8 +54,9 @@ exports.resolveComplaint = async (req, res) => {
     complaint.status = status;
     await complaint.save();
 
-    res.json({ message: `Complaint marked as ${status}`, complaint });
+    res.json({ message: `Status updated to ${status}`, complaint });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating complaint' });
+    console.error("Status Update Error:", error);
+    res.status(500).json({ message: 'Error updating status' });
   }
 };
