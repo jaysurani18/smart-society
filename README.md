@@ -1,6 +1,6 @@
 # Smart Society Management System
 
-A comprehensive full-stack web application designed to streamline the management of residential societies. This system enables administrators and residents to handle user management, maintenance bills, complaints, notices, and statistical reporting efficiently.
+A comprehensive full-stack web application designed to streamline the management of residential societies. This system enables administrators and residents to handle user management, maintenance bills, complaints, notices, and statistical reporting efficiently and many more functionalities
 
 ## Features
 
