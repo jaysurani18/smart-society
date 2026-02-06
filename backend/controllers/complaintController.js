@@ -38,6 +38,26 @@ exports.getComplaints = async (req, res) => {
   }
 };
 
+exports.deleteComplaint = async (req, res) => {
+  try {
+    // Only Admin can delete
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    const { id } = req.params;
+    const complaint = await Complaint.findByPk(id);
+
+    if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
+
+    await complaint.destroy(); // <--- Actually deletes it from DB
+
+    res.json({ message: 'Complaint deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting complaint' });
+  }
+};
+
 // Update Status (Admin Only)
 exports.updateComplaintStatus = async (req, res) => {
   try {

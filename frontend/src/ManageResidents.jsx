@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Trash2, Shield, User, MapPin } from 'lucide-react';
+import { Search, Trash2, Shield, User, MapPin, CheckCircle, Clock, Calendar } from 'lucide-react';
 import API from './api';
 
 const ManageResidents = ({ currentUser }) => {
@@ -21,7 +21,7 @@ const ManageResidents = ({ currentUser }) => {
     if(!window.confirm("Are you sure? This will remove the user permanently.")) return;
     try {
       await API.delete(`/users/${id}`);
-      fetchUsers(); // Refresh list
+      fetchUsers(); 
     } catch (err) { alert("Failed to delete user"); }
   };
 
@@ -46,14 +46,14 @@ const ManageResidents = ({ currentUser }) => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-          <Users className="text-blue-600" /> Resident Directory
+          <User className="text-blue-600" /> Resident Directory
         </h2>
         <div className="relative">
           <Search className="absolute left-3 top-3 text-slate-400" size={18} />
           <input 
             type="text" 
-            placeholder="Search by name, flat, or wing..." 
-            className="pl-10 p-3 border rounded-xl w-64 focus:ring-2 focus:ring-blue-500 outline-none"
+            placeholder="Search name, flat, or wing..." 
+            className="pl-10 p-3 border rounded-xl w-64 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -61,10 +61,11 @@ const ManageResidents = ({ currentUser }) => {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold">
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold border-b border-slate-100">
             <tr>
-              <th className="p-4">Resident Info</th>
+              <th className="p-4">Resident Profile</th>
+              <th className="p-4">Account Status</th> {/* NEW COLUMN */}
               <th className="p-4">Location</th>
               <th className="p-4">Role</th>
               <th className="p-4 text-right">Actions</th>
@@ -72,44 +73,75 @@ const ManageResidents = ({ currentUser }) => {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filteredUsers.map(u => (
-              <tr key={u.id} className="hover:bg-slate-50 transition">
+              <tr key={u.id} className="hover:bg-slate-50 transition duration-150">
+                
+                {/* 1. RESIDENT INFO + JOIN DATE */}
                 <td className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold">
-                      {u.name.charAt(0)}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm ${
+                      u.role === 'admin' ? 'bg-purple-600' : 'bg-blue-500'
+                    }`}>
+                      {u.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-bold text-slate-700">{u.name}</p>
-                      <p className="text-xs text-slate-400">{u.email}</p>
+                      <p className="font-bold text-slate-800">{u.name}</p>
+                      <p className="text-xs text-slate-400 font-medium">{u.email}</p>
+                      
+                      {/* NEW: Show when they joined */}
+                      <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-400">
+                         <Calendar size={10} />
+                         Joined: {new Date(u.createdAt).toLocaleDateString()}
+                      </div>
                     </div>
                   </div>
                 </td>
+
+                {/* 2. ACCOUNT STATUS (VERIFIED / PENDING) */}
+                <td className="p-4">
+                  {u.isSetup ? (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                      <CheckCircle size={12} /> Verified
+                    </span>
+                  ) : (
+                    <div className="flex flex-col items-start gap-1">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200">
+                        <Clock size={12} /> Pending
+                      </span>
+                      <span className="text-[10px] text-slate-400 pl-1">Invited via Link</span>
+                    </div>
+                  )}
+                </td>
+
+                {/* 3. LOCATION */}
                 <td className="p-4">
                   {u.wing && u.flatNumber ? (
-                    <span className="flex items-center gap-1 text-sm font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded w-fit">
-                      <MapPin size={14} /> {u.wing}-{u.flatNumber}
+                    <span className="flex items-center gap-1.5 text-sm font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-lg w-fit border border-slate-200">
+                      <MapPin size={14} className="text-slate-400" /> {u.wing} - {u.flatNumber}
                     </span>
                   ) : (
                     <span className="text-xs text-slate-400 italic">Not Assigned</span>
                   )}
                 </td>
+
+                {/* 4. ROLE */}
                 <td className="p-4">
-                  <span className={`text-xs font-bold px-2 py-1 rounded border flex items-center gap-1 w-fit ${
+                  <span className={`text-xs font-bold px-2 py-1 rounded border flex items-center gap-1 w-fit uppercase tracking-wider ${
                     u.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-slate-50 text-slate-600 border-slate-200'
                   }`}>
                     {u.role === 'admin' ? <Shield size={12}/> : <User size={12}/>}
-                    {u.role.toUpperCase()}
+                    {u.role}
                   </span>
                 </td>
-                <td className="p-4 text-right flex justify-end gap-2">
-                  {/* Prevent deleting yourself */}
+
+                {/* 5. ACTIONS */}
+                <td className="p-4 text-right">
                   {u.id !== currentUser.id && (
-                    <>
+                    <div className="flex justify-end gap-2">
                       <button 
                         onClick={() => handleRoleUpdate(u.id, u.role)}
-                        className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg font-bold transition"
+                        className="text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg font-bold transition shadow-sm"
                       >
-                        {u.role === 'admin' ? 'Demote' : 'Make Admin'}
+                        {u.role === 'admin' ? 'Demote' : 'Promote'}
                       </button>
                       <button 
                         onClick={() => handleDelete(u.id)}
@@ -118,17 +150,22 @@ const ManageResidents = ({ currentUser }) => {
                       >
                         <Trash2 size={18} />
                       </button>
-                    </>
+                    </div>
                   )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {filteredUsers.length === 0 && <p className="text-center p-8 text-slate-400">No users found.</p>}
+        {filteredUsers.length === 0 && (
+          <div className="text-center p-12">
+            <User size={48} className="mx-auto text-slate-200 mb-4" />
+            <p className="text-slate-400 font-medium">No residents found.</p>
+          </div>
+        )}
       </div>
     </div>
   );
 };
-import { Users } from 'lucide-react'; // Ensure icon import
+
 export default ManageResidents;

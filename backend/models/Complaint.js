@@ -18,7 +18,7 @@ const Complaint = sequelize.define('Complaint', {
     type: DataTypes.STRING, // Store the Cloudinary URL here
   },
   status: {
-    type: DataTypes.ENUM('pending', 'resolved'),
+    type: DataTypes.ENUM('pending', 'resolved', 'in-progress'), 
     defaultValue: 'pending',
   },
 });

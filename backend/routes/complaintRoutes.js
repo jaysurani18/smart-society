@@ -3,18 +3,17 @@ const router = express.Router();
 const { 
   fileComplaint, 
   getComplaints, 
-  updateComplaintStatus // <--- Must match the name in your controller exactly
+  updateComplaintStatus,
+  deleteComplaint // <--- 1. Import this
 } = require('../controllers/complaintController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
-// 1. File a complaint
 router.post('/', protect, upload.single('image'), fileComplaint);
-
-// 2. Get complaints list
 router.get('/', protect, getComplaints);
+router.put('/:id/status', protect, updateComplaintStatus);
 
-// 3. Update status (This is where the crash was happening)
-router.put('/:id/status', protect, updateComplaintStatus); 
+// 2. Add this DELETE route
+router.delete('/:id', protect, deleteComplaint); 
 
 module.exports = router;
