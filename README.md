@@ -24,7 +24,7 @@ A comprehensive full-stack web application designed to streamline the management
 
 ### Frontend
 - **React** with Vite build tool
-- **Tailwind CSS** for styling
+- **Tailwind CSS3** for styling
 - **React Router** for navigation
 - **Axios** for API calls
 - **Lucide React** for icons
